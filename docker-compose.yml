@@ -1,0 +1,150 @@
+version: "3.9"
+
+services:
+  redis0:
+    image: redis:7
+    container_name: redis0
+    volumes:
+      - volRedis0:/mem
+
+  clientProxyServ:
+    image: nginx
+    container_name: clientProxyServ
+    hostname: proxy
+    ports:
+      - "8080:80"
+    environment:
+      NAME: "proxy"
+      PORT: "50050"
+      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "proxyCode.go", "utility.go","commonComm.go"]
+
+  consensusNode01:
+    image: nginx
+    container_name: consensusNode01
+    hostname: cNode01
+    volumes:
+      - volCons01:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode01"
+      PORT: "50051"
+      ALLPEERS: "cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusNode02:
+    image: nginx
+    container_name: consensusNode02
+    hostname: cNode02
+    volumes:
+      - volCons02:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode02"
+      PORT: "50052"
+      ALLPEERS: "cNode01:50051,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusNode03:
+    image: nginx
+    container_name: consensusNode03
+    hostname: cNode03
+    volumes:
+      - volCons03:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode03"
+      PORT: "50053"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode04:50054,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusNode04:
+    image: nginx
+    container_name: consensusNode04
+    hostname: cNode04
+    volumes:
+      - volCons04:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode04"
+      PORT: "50054"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusNode05:
+    image: nginx
+    container_name: consensusNode05
+    hostname: cNode05
+    volumes:
+      - volCons05:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode05"
+      PORT: "50055"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusNode06:
+    image: nginx
+    container_name: consensusNode06
+    hostname: cNode06
+    volumes:
+      - volCons06:/mem
+    depends_on:
+      - redis0
+    environment:
+      NAME: "cNode06"
+      PORT: "50056"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  snapshotNode:
+    image: nginx
+    container_name: snapshotNode
+    hostname: snaps
+    environment:
+      NAME: "snaps"
+      PORT: "50049"
+      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056"
+    build:
+      context: .
+    command: ["go", "run", "snapshotCode.go", "utility.go","commonComm.go"]
+
+  dynConsensusNode:
+    image: nginx
+    volumes:
+      - volDynamic:/mem
+
+networks:
+  default:
+    name: sdcc_net
+
+
+volumes:
+  volCons01:
+  volCons02:
+  volCons03:
+  volCons04:
+  volCons05:
+  volCons06:
+  volRedis0:
+  volDynamic:

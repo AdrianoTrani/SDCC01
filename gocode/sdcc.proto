@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "./chatpb";
+
+import "google/protobuf/empty.proto";
+
+service ChatService {
+   	rpc SendMessage(Message) returns (Reply);
+}
+
+service Leadership {
+	rpc Heartbeat(Message) returns (google.protobuf.Empty);
+	rpc LeaderInfo(google.protobuf.Empty) returns (LeaderContacts);
+	rpc RequestVote(RaftMessage) returns (Reply);
+	rpc AppendEntries(Message) returns (Reply);
+	rpc ShareElectionResult(LeaderContacts) returns (google.protobuf.Empty);
+}
+
+service ReadingWriting {
+	rpc SearchKey(Message) returns (Reply);
+	rpc AddPair(PairKeyValue) returns (Reply);
+	rpc GetAllLog(google.protobuf.Empty) returns (Reply);
+}
+
+message Message {
+	string from = 1;
+	string text = 2;
+}
+
+message RaftMessage {
+	string from = 1;
+	uint32 term = 2;
+}
+
+message Reply {
+	string status = 1;
+}
+
+message LeaderContacts {
+	string from = 1;
+	string leadername = 2;
+	string leaderport = 3;
+}
+
+message PairKeyValue {
+	string key = 1;
+	string value = 2;
+}
+
+
+
+
+
