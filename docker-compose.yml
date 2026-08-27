@@ -17,8 +17,6 @@ services:
     hostname: cNode01
     volumes:
       - volCons01:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode01"
       PORT: "50051"
@@ -32,8 +30,6 @@ services:
     hostname: cNode02
     volumes:
       - volCons02:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode02"
       PORT: "50052"
@@ -47,8 +43,6 @@ services:
     hostname: cNode03
     volumes:
       - volCons03:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode03"
       PORT: "50053"
@@ -62,8 +56,6 @@ services:
     hostname: cNode04
     volumes:
       - volCons04:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode04"
       PORT: "50054"
@@ -77,8 +69,6 @@ services:
     hostname: cNode05
     volumes:
       - volCons05:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode05"
       PORT: "50055"
@@ -92,8 +82,6 @@ services:
     hostname: cNode06
     volumes:
       - volCons06:/mem
-    depends_on:
-      - redis0
     environment:
       NAME: "cNode06"
       PORT: "50056"
