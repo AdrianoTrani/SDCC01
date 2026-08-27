@@ -114,11 +114,6 @@ services:
       context: .
     command: ["go", "run", "snapshotCode.go", "utility.go","commonComm.go"]
 
-  dynConsensusNode:
-    image: nginx
-    volumes:
-      - volDynamic:/mem
-
 networks:
   default:
     name: sdcc_net
