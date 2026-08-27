@@ -1,14 +1,5 @@
-version: "3.9"
-
 services:
-  redis0:
-    image: redis:7
-    container_name: redis0
-    volumes:
-      - volRedis0:/mem
-
   clientProxyServ:
-    image: nginx
     container_name: clientProxyServ
     hostname: proxy
     ports:
@@ -22,7 +13,6 @@ services:
     command: ["go", "run", "proxyCode.go", "utility.go","commonComm.go"]
 
   consensusNode01:
-    image: nginx
     container_name: consensusNode01
     hostname: cNode01
     volumes:
@@ -38,7 +28,6 @@ services:
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
   consensusNode02:
-    image: nginx
     container_name: consensusNode02
     hostname: cNode02
     volumes:
@@ -54,7 +43,6 @@ services:
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
   consensusNode03:
-    image: nginx
     container_name: consensusNode03
     hostname: cNode03
     volumes:
@@ -70,7 +58,6 @@ services:
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
   consensusNode04:
-    image: nginx
     container_name: consensusNode04
     hostname: cNode04
     volumes:
@@ -86,7 +73,6 @@ services:
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
   consensusNode05:
-    image: nginx
     container_name: consensusNode05
     hostname: cNode05
     volumes:
@@ -102,7 +88,6 @@ services:
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
   consensusNode06:
-    image: nginx
     container_name: consensusNode06
     hostname: cNode06
     volumes:
@@ -146,5 +131,3 @@ volumes:
   volCons04:
   volCons05:
   volCons06:
-  volRedis0:
-  volDynamic:
