@@ -1,5 +1,5 @@
 services:
-  clientProxyServ:
+  clientproxyserv:
     container_name: clientProxyServ
     hostname: proxy
     ports:
@@ -12,7 +12,7 @@ services:
       context: .
     command: ["go", "run", "proxyCode.go", "utility.go","commonComm.go"]
 
-  consensusNode01:
+  consensusnode01:
     container_name: consensusNode01
     hostname: cNode01
     volumes:
@@ -25,7 +25,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  consensusNode02:
+  consensusnode02:
     container_name: consensusNode02
     hostname: cNode02
     volumes:
@@ -38,7 +38,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  consensusNode03:
+  consensusnode03:
     container_name: consensusNode03
     hostname: cNode03
     volumes:
@@ -51,7 +51,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  consensusNode04:
+  consensusnode04:
     container_name: consensusNode04
     hostname: cNode04
     volumes:
@@ -64,7 +64,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  consensusNode05:
+  consensusnode05:
     container_name: consensusNode05
     hostname: cNode05
     volumes:
@@ -77,7 +77,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  consensusNode06:
+  consensusnode06:
     container_name: consensusNode06
     hostname: cNode06
     volumes:
@@ -90,8 +90,7 @@ services:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
 
-  snapshotNode:
-    image: nginx
+  snapshotnode:
     container_name: snapshotNode
     hostname: snaps
     environment:
