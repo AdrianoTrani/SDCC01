@@ -5,19 +5,11 @@ package main
 import (
 	"fmt"
 	"time"
-	//"context"
-	//"net"
-	//"log"
 	"runtime"
 	"os"
 	"bufio"
 	"strings"
 	"path/filepath"
-
-	//"google.golang.org/grpc"
-	//"google.golang.org/protobuf/types/known/emptypb"
-
-	//pb "gocode/chatpb"
 )
 
 

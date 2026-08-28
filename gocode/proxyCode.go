@@ -3,12 +3,15 @@
 package main
 
 import (
-	//"github.com/redis/go-redis/v9"
 	"os"
 	"context"
 	"errors"
 	"time"
 	"strings"
+	"bufio"
+	"fmt"
+	"log"
+	"net"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -67,14 +70,6 @@ func whoIsLeader(){
 			break //stop asking
 		}
 	}
-
-	/*
-	if err != nil {
-		return "" , "", errors.New("[RPC ERROR]")
-	}
-	*/
-
-	//thisNode.LeaderName, thisNode.LeaderPort = "cNode01", "50051"
 }
 //------------------------------------------------------------------------------------------------------------------------------
 func setInfo(){
@@ -93,14 +88,12 @@ func setInfo(){
 	}
 
 }
-
 //------------------------------------------------------------------------------------------------------------------------------
 func circuitBreaker(){
 	customPrintln("Time to activate Circuit Breaker")
 	thisNode.CircuitBreaker = true
 	time.Sleep(circuitBreakerTimer * time.Second)
 	thisNode.CircuitBreaker = false
-	
 }
 //------------------------------------------------------------------------------------------------------------------------------
 //Given a key, return the value (if present)
@@ -146,8 +139,6 @@ func readFromExt(key string) (string , error) {
 func writeFromExt(key, value string) (string , error){
 	customPrintln("Received a writing request from the outside")
 
-
-
 	// If Circuit Breaker is active, do not forward the message
 	if(thisNode.CircuitBreaker){
 		return "", errors.New("[CIRCUIT BREAKER]")
@@ -187,122 +178,115 @@ func writeFromExt(key, value string) (string , error){
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
+func handleConnection(conn net.Conn) {
+	// Variables
+	myScanner := bufio.NewScanner(conn)
+	var command_result string
+	var command_error error
+
+	// Pospone closing
+	defer conn.Close()
+
+	// Brief introduction
+	fmt.Fprintf(conn , "Client Proxy Console - Instructions\n")
+	fmt.Fprintf(conn , "SEARCH:<key>\n")
+	fmt.Fprintf(conn , "INSERT:<key>,<value>\n")
+	fmt.Fprintf(conn , "COMMAND> ")
+
+	// Input cycle - one command at a time
+	for myScanner.Scan(){
+		// Check for errors
+		if err := myScanner.Err(); err != nil {
+        		log.Println("connection:", err)
+			fmt.Printf("Scanner failed\n")
+    		}
+		
+		//fmt.Fprintf(conn , "Received: %s\n", receivedCommand)
+
+		// Clean the received input and act accordingly
+		// 	TrimSpace removes unnecessary spaces
+		// 	ToLower makes the console non-case sensitive
+		//	SplitN separates command and parameters (if any)
+		receivedCommand := strings.TrimSpace(myScanner.Text())
+		commandParts := strings.SplitN(receivedCommand, ":", 2)
+		commandOnly := commandParts[0]
+		parameters := commandParts[1]
+
+		switch strings.ToLower(commandOnly){
+			case "SEARCH":
+				customPrintln("Received command: " + commandOnly + ":" + parameters)
+				command_result, command_error = readFromExt(parameters)
+				if(command_error != nil){
+					fmt.Fprintf(conn , "Something went wrong: " + command_error.Error() + "\n")
+					// Activate CircuitBreaker if not already present
+					if !thisNode.CircuitBreaker{go circuitBreaker()}
+				}else{
+					fmt.Fprintf(conn , "(Key,Value) = (" + parameters + "," + command_result + ")\n")
+				}
+			case "INSERT":
+				/*
+				parametersList := strings.SplitN(parameters, ",", 2)
+				customPrintln("Received command: " + commandOnly + "(" + parametersList[0] + ","+ parametersList[1] + ")")
+				command_result, command_error = writeFromExt(parameters[0],parameters[1])
+				if(command_error != nil){
+					fmt.Fprintf(conn , "Something went wrong: " + command_error.Error() + "\n")
+					// Activate CircuitBreaker if not already present
+					if !thisNode.CircuitBreaker{go circuitBreaker()}
+				}else{
+					fmt.Fprintf(conn , command_result)
+				}
+				*/
+			default:
+				customPrintln("Received command: " + commandOnly)
+				fmt.Println("> This is NOT a valid command")
+		}
+		fmt.Fprintf(conn , "COMMAND> ")
+	}
+
+
+}
+
+func startConsoleServer(address string){
+	// Start to listen
+	listenerConsole, err := net.Listen("tcp", address)
+	if err != nil{
+		log.Printf("Listen failed\n")
+	}
+
+	// Pospone
+	defer listenerConsole.Close()
+
+	// Debug print
+	log.Printf("TCP input listening on %s", address)
+
+	for {
+		conn, err := listenerConsole.Accept()
+		if err != nil {
+			log.Printf("Accept failed\n")
+			continue
+        }
+
+        go handleConnection(conn)
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------
 func main() {
 	//Print a short welcoming message at the start
 	greetings()
 
-
-	
 	// Set personal information
 	setInfo()
+
+	// Wait
+	shortSleep()
 
 	// Start the listener using a goroutine
 	go startServer(thisNode.Name, thisNode.Port)
 
-
-	// TEMP Wait
-	shortSleep()
-
-
-	// Quick tests
-	var test_result string
-	var test_error error
+	// Start the terminal listener using a goroutine
+	go startConsoleServer(":9001")
 	
-
-	test_result, test_error = writeFromExt("Yoda" , "Uses the Lightsaber")
-	if(test_error != nil){
-		customPrintln("Something went wrong")
-	}else{
-		customPrintln("Received a writing request from the outside ----- " + test_result)
-	}
-
-
-
-	test_result, test_error = writeFromExt("Luke Skywalker" , "Hates sand")
-	if(test_error != nil){
-		customPrintln("Something went wrong")
-	}else{
-		customPrintln("Received a writing request from the outside ----- " + test_result)
-	}
-
-
-
-
-	test_result, test_error = writeFromExt("Obi Wan Kenobi" , "It's a Jedi Master")
-	if(test_error != nil){
-		customPrintln("Something went wrong")
-	}else{
-		customPrintln("Received a writing request from the outside ----- " + test_result)
-	}
-
-
-
-
-
-
-
-
-	// Quick test - LOOP - try to stop leader container using Docker Desktop while you run this
-	var res6 string
-	var err6 error
-	for{
-			res6,err6 = readFromExt("Yoda")
-			if(err6 != nil){
-				customPrintln("Something went wrong:" + err6.Error())
-
-				// Activate CircuitBreaker if not already present
-				if !thisNode.CircuitBreaker{go circuitBreaker()}	
-			}else{
-				customPrintln("Received a reading request from the outside ----- " + res6)
-			}
-			shortSleep()
-	}
-
-
-	
-
-
-
-	// Force the container to stay active
-	for{
-		//shortSleep()
-	}
-
-
-
-
-	/*
-	// Quick test
-	res1,err1 := readFromExt("Obi Wan Kenobi")
-	if(err1 != nil){
-		customPrintln("Something went wrong")
-	}else{
-		customPrintln("Result ----- " + res1)
-	}
-
-	// Quick test
-	res2,err2 := writeFromExt("Luke Skywalker" , "NOT a Jedi Master")
-	customPrintln("Received a writing request from the outside ----- " + res2)
-
-	// Quick test
-	res3,err3 := writeFromExt("Obi Wan Kenobi" , "It's a Jedi Master")
-	customPrintln("Received a writing request from the outside ----- " + res3)
-
-	// Quick test
-	res4,err4 := writeFromExt("Yoda" , "Uses the Lightsaber")
-	customPrintln("Received a writing request from the outside ----- " + res4)
-	*/
-
-
-	/*
-	res5,err5 := writeFromExt("Yoda" , "Uses the Lightsaber")
-	if(err5 != nil){
-		
-	}else{
-		customPrintln("Received a writing request from the outside ----- " + res5)
-	}
-	*/
-
-
-
+	// Force the container to stay active - unlike an empty for this is more resource-friendly
+	select {}
 }

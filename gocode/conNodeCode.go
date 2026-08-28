@@ -108,7 +108,7 @@ func (sl *serverL) RequestVote(ctx context.Context, msg *pb.RaftMessage) (*pb.Re
 			// EXTRA - The receiver node is the leader
 			if(thisNode.State == "LEADER"){
 				customPrintln("This node voted NO to " + msg.From + " (Because it is the leader)")
-				return &pb.Reply{Status: "FALSE",}, nil
+				return &pb.Reply{Status: "FALSE3",}, nil
 			}
 	
 		// The receiver never voted
@@ -120,6 +120,7 @@ func (sl *serverL) RequestVote(ctx context.Context, msg *pb.RaftMessage) (*pb.Re
 			// The receiver never voted and it's a follower
 			}else{
 				thisNode.AlreadyVoted = true
+				thisNode.State = "FOLLOWER"		//A candidate should not be able to enter this branch, put this node as follower nonetheless
 				customPrintln("This node voted YES to " + msg.From + " (Because it never voted before)")
 				return &pb.Reply{Status: "TRUE",}, nil
 			}
@@ -130,7 +131,7 @@ func (sl *serverL) RequestVote(ctx context.Context, msg *pb.RaftMessage) (*pb.Re
 		return &pb.Reply{Status: "FALSE",}, nil
 	}
 
-	// In any other case return negative vote to the Sender
+	// In any other case return special negative vote to the Sender as a way to inform that something went wrong
 	return &pb.Reply{Status: "FALSE2",}, nil	
 }
 
@@ -343,20 +344,6 @@ func (sl *serverL) Heartbeat(ctx context.Context, msg *pb.Message) (*emptypb.Emp
 		customPrintln("The node: " + msg.From + " it's not the leader anymore")
 		return &emptypb.Empty{}, nil
 	}
-
-
-
-
-
-	/*
-	heartMonitor := NewHeartbeatMonitor()
-	heartMonitor.HeartbeatReceived()
-	*/
-
-	//sl.heartbeatMonitor.HeartbeatReceived()
-
-	
-
 }
 
 // Using Service "Leadership"
@@ -410,92 +397,10 @@ func main() {
 	// Every node starts to listen for messages - use goroutine
 	go startServer(thisNode.Name, thisNode.Port)
 
-	// The leader sends heartbeats
+	// Every node runs this
+	// Only the leader sends heartbeats
 	go sendPeriodicHeartbeats()
 
-
-
-
-
-
-
-
-	//writeNewPair("Obi Wan Kenobi", "I have the High Ground")
-	//writeNewPair("Luke Skywalker" , "NOT a Jedi Master")
-	
-	//readAllVolume()
-
-	// The leader sends heartbeats
-	// The followers check their timer "electionTimeout"
-	/*
-	if(thisNode.State == "LEADER"){
-		go sendPeriodicHeartbeats()
-	}
-	*/
-
-	// Force the container to stay active
-	for{
-		//shortSleep()
-	}
-
-	// ---------- ROBA DA CANCELLARE ---------------------------------------------------------------------------------------
-
-	/*
-	// Quick test
-	if(thisNode.Name == "cNode05"){
-		sendRequestVote()
-	}
-	*/
-
-
-	/*
-	// Send a random message
-	if(thisNode.Name == "cNode01"){
-		hostname := "cNode04"
-		port := "50054"
-		mess := "ciao ciao ciao ciao ciao"
-		tmp2 := sendMessage(thisNode.Name, hostname+":"+port , mess)
-		customPrintln("I got this Reply: " + tmp2)
-	}
-	*/
-
-
-	/*
-	// Testing volume
-	if(thisNode.State == "LEADER"){
-		writeNewPair("Kenobi", "Hello There")
-		writeNewPair("Obi Wan Kenobi", "I have the High Ground")
-		readAllVolume()
-		tmmmp := getValue("Obi Wan Kenobi")
-		customPrintln("Looking for Obi: " + tmmmp)
-
-	}
-	*/
-
-
-	/*
-	if(os.Getenv("NAME") == "cNode01"){
-		// Start the listener inside a goroutine
-		go startServer(thisNode.Name, "50051")
-
-		// Start the listener inside a goroutine
-		//go startServerElection(thisNode.Name, thisNode.Port)
-	}else{
-		//go startServerElection(thisNode.Name, thisNode.Port)
-		go startServer(thisNode.Name, thisNode.Port)
-		sendMessageElection(thisNode.Name, thisNode.Peers[0], "I want the leadership")
-	}
-	*/
-	
-
-
-	//Start a mockup election
-	/*
-	if(os.Getenv("NAME") == "cNode03"){
-		startElection()
-	}
-	*/
-
-	
-
+	// Force the container to stay active - unlike an empty for this is more resource-friendly
+	select {}
 }

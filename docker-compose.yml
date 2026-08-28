@@ -4,6 +4,7 @@ services:
     hostname: proxy
     ports:
       - "8080:80"
+      - "9001:9001"
     environment:
       NAME: "proxy"
       PORT: "50050"
