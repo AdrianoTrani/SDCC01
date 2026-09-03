@@ -1,7 +1,9 @@
 # 💡 SDCC Project B5 – A.Y. 2025/2026
 
-**Course:** Distributed Systems and Cloud Computing (SDCC)  
+**Course:** Distributed Systems and Cloud Computing (SDCC)
+
 **Team:** Adriano Trani
+
 **Professors:** Valeria Cardellini
 
 ---
