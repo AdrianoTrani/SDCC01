@@ -37,45 +37,45 @@ The final analysis offers data about the performance of the implemented customiz
 
 **Git**
 
-(sudo dnf install git -y)
+	sudo dnf install git -y
 
 **Docker**
 
-	(sudo yum update -y)
-	(sudo yum install -y docker)
-	(sudo systemctl start docker)
-	(sudo systemctl enable docker)
-	(sudo usermod -aG docker $USER)
+	sudo yum update -y
+	sudo yum install -y docker
+	sudo systemctl start docker
+	sudo systemctl enable docker
+	sudo usermod -aG docker $USER
 
 **Docker Compose**
 
-	(mkdir -p ~/.docker/cli-plugins)
+	mkdir -p ~/.docker/cli-plugins
 
-	(curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
-		  -o ~/.docker/cli-plugins/docker-compose)
+	curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
+		  -o ~/.docker/cli-plugins/docker-compose
 
-	(chmod +x ~/.docker/cli-plugins/docker-compose)
+	chmod +x ~/.docker/cli-plugins/docker-compose
 
 **Docker Build**
 
-	(mkdir -p ~/.docker/cli-plugins)
+	mkdir -p ~/.docker/cli-plugins
 
-	(curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
-  -o ~/.docker/cli-plugins/docker-buildx)
+	curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
+  -o ~/.docker/cli-plugins/docker-buildx
 
-	(chmod +x ~/.docker/cli-plugins/docker-buildx)
+	chmod +x ~/.docker/cli-plugins/docker-buildx
 
 ---
 
 ### 🖥️ File Download and Project Execution
 - On Windows 11 is also requested to configure PuTTygen to connect to the instance using a pair of keys.
 Such pair is NOT present in this repository.
-- Login as ec2-user
-- (only first time) git clone https://github.com/AdrianoTrani/SDCC01.git
-- git pull origin main
-- cd SDCC01
-- docker-compose up -d --build
-- docker compose attach clientproxyserv
+	- Login as ec2-user
+	- (only first time) git clone https://github.com/AdrianoTrani/SDCC01.git
+	- git pull origin main
+	- cd SDCC01
+	- docker-compose up -d --build
+	- docker compose attach clientproxyserv
 
   
 ---
