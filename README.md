@@ -36,9 +36,11 @@ The final analysis offers data about the performance of the implemented customiz
 ## ⚙️ Configure EC2 instance
 
 **Git**
-sudo dnf install git -y
+
+(sudo dnf install git -y)
 
 **Docker**
+
 (sudo yum update -y)
 (sudo yum install -y docker)
 (sudo systemctl start docker)
@@ -46,6 +48,7 @@ sudo dnf install git -y
 (sudo usermod -aG docker $USER)
 
 **Docker Compose**
+
 (mkdir -p ~/.docker/cli-plugins)
 
 (curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
@@ -54,6 +57,7 @@ sudo dnf install git -y
 (chmod +x ~/.docker/cli-plugins/docker-compose)
 
 **Docker Build**
+
 (mkdir -p ~/.docker/cli-plugins)
 
 (curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
