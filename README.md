@@ -14,6 +14,7 @@ The project is composed of three different types of node:
 - Client Proxy, responsible to handle the interactions between the system and the outside.
 - Consensus Node, that manages the data in a distributed and consistent way using a simplified version of Raft algorithm.
 - Snapshot Node, that creates snapshots for backup and restore purposes.
+
 The final analysis offers data about the performance of the implemented customized simplified RAFT algorithm.
 
 ---
