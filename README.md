@@ -26,10 +26,10 @@ The final analysis offers data about the performance of the implemented customiz
 - **gRPC and Protocol Buffers** (for communication between services)
 
 ## 🛠️ Compatibility
-(Suggested: Docker version 25.0.14)
-(Suggested: Docker Compose version v5.4.0)
-(Suggested: github.com/docker/buildx v0.17.1)
-(Suggested: git version 2.50.1)
+(Suggested: Docker version 25.0.14)  
+(Suggested: Docker Compose version v5.4.0)  
+(Suggested: github.com/docker/buildx v0.17.1)  
+(Suggested: git version 2.50.1)  
 
 ---
 
