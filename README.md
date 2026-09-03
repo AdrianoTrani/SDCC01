@@ -26,10 +26,10 @@ The final analysis offers data about the performance of the implemented customiz
 - **gRPC and Protocol Buffers** (for communication between services)
 
 ## 🛠️ Compatibility
-      (Suggested: Docker version 25.0.14)
-      (Suggested: Docker Compose version v5.4.0)
-      (Suggested: github.com/docker/buildx v0.17.1)
-      (Suggested: git version 2.50.1)
+(Suggested: Docker version 25.0.14)
+(Suggested: Docker Compose version v5.4.0)
+(Suggested: github.com/docker/buildx v0.17.1)
+(Suggested: git version 2.50.1)
 
 ---
 
@@ -41,29 +41,29 @@ The final analysis offers data about the performance of the implemented customiz
 
 **Docker**
 
-(sudo yum update -y)
-(sudo yum install -y docker)
-(sudo systemctl start docker)
-(sudo systemctl enable docker)
-(sudo usermod -aG docker $USER)
+	(sudo yum update -y)
+	(sudo yum install -y docker)
+	(sudo systemctl start docker)
+	(sudo systemctl enable docker)
+	(sudo usermod -aG docker $USER)
 
 **Docker Compose**
 
-(mkdir -p ~/.docker/cli-plugins)
+	(mkdir -p ~/.docker/cli-plugins)
 
-(curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
+	(curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
 		  -o ~/.docker/cli-plugins/docker-compose)
 
-(chmod +x ~/.docker/cli-plugins/docker-compose)
+	(chmod +x ~/.docker/cli-plugins/docker-compose)
 
 **Docker Build**
 
-(mkdir -p ~/.docker/cli-plugins)
+	(mkdir -p ~/.docker/cli-plugins)
 
-(curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
+	(curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
   -o ~/.docker/cli-plugins/docker-buildx)
 
-(chmod +x ~/.docker/cli-plugins/docker-buildx)
+	(chmod +x ~/.docker/cli-plugins/docker-buildx)
 
 ---
 
