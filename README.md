@@ -52,7 +52,7 @@ Suggested: git version 2.50.1
 	mkdir -p ~/.docker/cli-plugins
 
 	curl -SL https://github.com/docker/compose/releases/download/v5.4.0/docker-compose-linux-x86_64 \
-		  -o ~/.docker/cli-plugins/docker-compose
+			  -o ~/.docker/cli-plugins/docker-compose
 
 	chmod +x ~/.docker/cli-plugins/docker-compose
 
@@ -61,7 +61,7 @@ Suggested: git version 2.50.1
 	mkdir -p ~/.docker/cli-plugins
 
 	curl -L https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64 \
-  -o ~/.docker/cli-plugins/docker-buildx
+ 	 -o ~/.docker/cli-plugins/docker-buildx
 
 	chmod +x ~/.docker/cli-plugins/docker-buildx
 
