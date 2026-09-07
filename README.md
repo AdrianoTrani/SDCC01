@@ -70,7 +70,7 @@ Suggested: protobuf v1.36.12
 ---
 
 ### 🖥️ File Download and Project Execution
-- On Windows 11 is also requested to configure PuTTygen to connect to the instance using a pair of keys.
+- On Windows 11 is also requested to configure PuTTy to connect to the instance using a pair of keys.
 Such pair is NOT present in this repository.
 	- Login as ec2-user
 	- (only first time) git clone https://github.com/AdrianoTrani/SDCC01.git
