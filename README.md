@@ -76,7 +76,7 @@ Such pair is NOT present in this repository.
 	- (only first time) git clone https://github.com/AdrianoTrani/SDCC01.git
 	- git pull origin main
 	- cd SDCC01
-	- docker-compose up -d --build
+	- docker compose up -d --build
 	- docker compose attach clientproxyserv
 
   
