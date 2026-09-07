@@ -7,6 +7,7 @@ import (
 	"strings"
 	"context"
 	"time"
+	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -20,6 +21,7 @@ type NodeContacts struct {
 	LeaderName string
 	LeaderPort string
 	CNodes []string
+	State string
 }
 //------------------------------------------------------------------------------------------------------------------------------
 // Global variables & global constants
@@ -74,7 +76,7 @@ func recoverElectionTime(){
 			if(everyRow != ""){
 				for _, row := range strings.Split(everyRow, "\n") {
 					if strings.HasPrefix(row, "[ELECTION-TIME]"){
-						customPrintln("ROW: " + row)
+						fmt.Println("["+CNodeInfo+"] ROW: " + row)
 					}
 				}
 			}

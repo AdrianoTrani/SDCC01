@@ -11,6 +11,7 @@ import (
 	"context"
 	"log"
     	"math/rand"
+	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -27,15 +28,13 @@ type HeartbeatMonitor struct {
 type NodeState struct {
 	Name string
 	Port string
-	Peers []string
+	CNodes []string
 	LeaderName string
 	LeaderPort string
 	State string
 	RaftTerm uint32
 	AlreadyVoted bool
 	HBMonitor *HeartbeatMonitor
-	
-	//IsThereALeader bool
 }
 
 
@@ -46,7 +45,7 @@ type NodeState struct {
 var thisNode NodeState
 const heartbeatPeriod = 30	//expressed in seconds
 const electionTimeout = 80	//expressed in seconds
-const restartElection = 60	//expressed in seconds
+const restartElection = 180	//expressed in seconds
 var convergeTime time.Time	//used to measure the time between the start of an election and the confirmation of a leader
 //------------------------------------------------------------------------------------------------------------------------------
 // Set the initial values of the struct
@@ -63,11 +62,9 @@ func setUpNodeInfo(){
 	if value == "" {
 		customPrintln("ALLPEERS environment variable is empty")
 	}else{
-		thisNode.Peers = strings.Split(value, ",")
+		thisNode.CNodes = strings.Split(value, ",")
 	}
 }
-//------------------------------------------------------------------------------------------------------------------------------
-
 //------------------------------------------------------------------------------------------------------------------------------
 // Set the selected node as a leader
 func setTheLeader(leaderName,leaderPort  string){
@@ -163,14 +160,15 @@ func requestVote(from string, target string, term uint32) string{
 // Check the received votes
 // If the majority are "TRUE" then return true
 // If the majority are "FALSE" then return false
-func majorityChecker(votes []string) (bool){
+// In any case return the number of votes
+func majorityChecker(votes []string) (bool, int){
 	var positiveVotes int = 1	// The node voted for itself
 	var negativeVotes int = 0
 	var notvalidVotes int = 0
 
 	for _, vote := range votes {
 		if(vote == "FALSE3"){
-			return false
+			return false, 0
 		}
 		if(vote == "TRUE"){
 			positiveVotes++
@@ -185,20 +183,31 @@ func majorityChecker(votes []string) (bool){
 
 	// Check the votes
 	if(positiveVotes > negativeVotes){
-		return true
+		return true, (positiveVotes+negativeVotes)
 	}else{
-		return false
+		return false, (positiveVotes+negativeVotes) 
 	}
 }
 
 func NewHeartbeatMonitor() *HeartbeatMonitor {
 	hbm := &HeartbeatMonitor{}
+
+	// If the timer reaches zero, execute this part
 	hbm.timer = time.AfterFunc(electionTimeout*time.Second, func() {
 		// For avoiding deadlocks, wait a random amount of time (150-1999 milliseconds)
 		time.Sleep(time.Duration(150+rand.Intn(1850)) * time.Millisecond)
 
-		// Quick check
+		// Quick redundant check
 		if(thisNode.State != "LEADER"){
+
+
+
+			// TEST TEST This is a new round of election
+			//thisNode.AlreadyVoted = false
+
+
+
+
 			// Register operation in personal log
 			appendOperation("ELECTION-START" , time.Now().Format("15:04:05.000") , "Started by: " + thisNode.Name)
 			
@@ -218,7 +227,7 @@ func NewHeartbeatMonitor() *HeartbeatMonitor {
 func  (sl *serverL) ShareElectionResult(ctx context.Context, msg *pb.LeaderContacts) (*emptypb.Empty, error){
 	// The receiver node registers the new node as leader
 	setTheLeader(msg.Leadername ,msg.Leaderport)
-	appendOperation("NEW-LEADER-IS" , time.Now().Format("15:04:05.000") , "ServerName: " + msg.Leadername + "ServerPort: " + msg.Leaderport)
+	appendOperation("NEW-LEADER-IS" , time.Now().Format("15:04:05.000") , "ServerName: " + msg.Leadername + " ServerPort: " + msg.Leaderport)
 
 	return &emptypb.Empty{}, nil
 }
@@ -255,12 +264,13 @@ func sendLeaderContacts(leaderName, leaderPort, target string){
 // Send a RequestVote rpc to every other peer
 // Can't do it if already voted for a node
 func sendRequestVote(){
+	customPrintln("Election time")
 	// The node can try to vote for itself and asks for votes
 	if(!thisNode.AlreadyVoted){
 		thisNode.State = "CANDIDATE"
 		receivedVotes := []string{}
 		thisNode.AlreadyVoted = true	//voted for itself
-		for _, peerInfo := range thisNode.Peers {
+		for _, peerInfo := range thisNode.CNodes {
 			receivedVotes = append(receivedVotes, requestVote(thisNode.Name, peerInfo, thisNode.RaftTerm) )
 		}
 
@@ -268,12 +278,12 @@ func sendRequestVote(){
 		results := strings.Join(receivedVotes," ")
 		customPrintln("VOTES: " + results)
 
-		// Check if the node is a candidate - CONTROLLO ECCESSIVAMENTE ZELANTE
+		// Check if the node is a candidate - REDUNDANT
 		//if(thisNode.State == "CANDIDATE"){
 
 
-
-			if(majorityChecker(receivedVotes)){
+			electionRes, numOfNodes := majorityChecker(receivedVotes)
+			if(electionRes){
 				// Assume leader role
 				customPrintln("Majority obtained")
 				thisNode.State = "LEADER"
@@ -285,24 +295,31 @@ func sendRequestVote(){
 				appendOperation("ELECTED-AS-LEADER" , time.Now().Format("15:04:05.000") , "ServerName: " + thisNode.Name)
 
 				// Register needed time for leader election in personal log
-				appendOperation("ELECTION-TIME", time.Since(convergeTime).String() , "Time needed for the election of " + thisNode.Name)
+				appendOperation("ELECTION-TIME", time.Since(convergeTime).String() , "Time needed for the election of " + thisNode.Name + " with this number of nodes: " + strconv.Itoa(numOfNodes))
 
 				//setTheLeader(thisNode.Name, thisNode.Port)
 				//go sendPeriodicHeartbeats()
 
 				// Notify other nodes of the new leader
-				for _, peerInfo := range thisNode.Peers {
+				for _, peerInfo := range thisNode.CNodes {
 					customPrintln("Telling to: " + peerInfo)
 					sendLeaderContacts(thisNode.Name, thisNode.Port, peerInfo)
-					sendHeartbeat(thisNode.Name, peerInfo, "heartbeat")
+					sendHeartbeat(thisNode.Name, peerInfo)
 				}
 			// The node stays a follower without the majority
 			}else{
 				customPrintln("Majority NOT obtained")
 				thisNode.State = "FOLLOWER"
+				thisNode.AlreadyVoted = false
+
+				// Reset the timer once more
+				//	If there is a Leader Node despite this node failed election then the system will work
+				//	If no Node is Leader then this node (or maybe another node) will try again to start an election
+				
+				thisNode.HBMonitor.ElectionFailed()
 			}
 
-		/*
+		/* REDUNDANT CONTROL
 		// The node is a follower - can't procede with the election
 		}else{
 			//thisNode.AlreadyVoted = false
@@ -310,45 +327,75 @@ func sendRequestVote(){
 		}
 		*/
 
-	// This node already voted for another node
+	// This node already voted
 	}else{
-		customPrintln("Already voted this round - This node can't try to be leader")
+		// EXTRA CHECK --- This node already voted for itself
+		if(thisNode.State == "CANDIDATE"){
+			customPrintln("Already voted this round and this node is a candidate - Something is wrong")
+			thisNode.AlreadyVoted = false
+			
+			// Reset the timer once more
+			//	If there is a Leader Node despite this node failed election then the system will work
+			//	If no Node is Leader then this node (or maybe another node) will try again to start an election
+			thisNode.HBMonitor.ElectionFailed()
+
+		// This node already voted for another node
+		}else{
+			customPrintln("Already voted for another node - This node can't try to be leader")
+
+			//thisNode.AlreadyVoted = false		//TEMP
+
+			// Reset the timer once more
+			//	If there is a Leader Node despite this node failed election then the system will work
+			//	If no Node is Leader then this node (or maybe another node) will try again to start an election when the timer expires
+			thisNode.HBMonitor.ElectionFailed()
+		}
+
+		
 	}
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
-
-
-// Call this whenever the node receives a heartbeat.
+// Call this whenever the node receives a heartbeat
 func (m *HeartbeatMonitor) HeartbeatReceived() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	m.timer.Stop()
 	m.timer.Reset(electionTimeout * time.Second)
+
+	customPrintln("electionTimeout - Timer reset")
 }
 
+// Call this whenever the node need to reset the timer
+func (m *HeartbeatMonitor) ElectionFailed() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.timer.Stop()
+	m.timer.Reset(restartElection * time.Second)
+
+	customPrintln("restartElection - Timer reset")
+}
+
+
 // Implement the homonym service inside sdcc.proto
-func (sl *serverL) Heartbeat(ctx context.Context, msg *pb.Message) (*emptypb.Empty, error){
+func (sl *serverL) Heartbeat(ctx context.Context, msg *pb.LeaderContacts) (*emptypb.Empty, error){
 	customPrintln("Received heartbeat from: " + msg.From)
 
-	// Check the validity of the heartbeat
-	if(msg.From == thisNode.LeaderName){
-		thisNode.HBMonitor.HeartbeatReceived()
+	thisNode.HBMonitor.HeartbeatReceived()
 
-		thisNode.State = "FOLLOWER"
-		thisNode.AlreadyVoted = false
-		return &emptypb.Empty{}, nil
-	// Received invalid heartbeat
-	}else{
-		customPrintln("The node: " + msg.From + " it's not the leader anymore")
-		return &emptypb.Empty{}, nil
-	}
+	thisNode.State = "FOLLOWER"
+	thisNode.AlreadyVoted = false
+	thisNode.LeaderName = msg.Leadername
+	thisNode.LeaderPort = msg.Leaderport
+
+	return &emptypb.Empty{}, nil
 }
 
 // Using Service "Leadership"
 // Send an heartbeat to a target node
-func sendHeartbeat(from, target, messageText string) string{
+func sendHeartbeat(from, target string) string{
 	customPrintln("Sending heartbeat to " + target)
 	conn, err := grpc.Dial(target,grpc.WithInsecure(),)
 
@@ -360,7 +407,8 @@ func sendHeartbeat(from, target, messageText string) string{
 
 	client := pb.NewLeadershipClient(conn)
 
-	reply, err := client.Heartbeat(context.Background(),&pb.Message{From: from,Text: messageText,},)
+	//reply, err := client.Heartbeat(context.Background(),&pb.Message{From: from,Text: messageText,},)
+	reply, err := client.Heartbeat(context.Background(),&pb.LeaderContacts{From: from,Leadername: thisNode.LeaderName,Leaderport: thisNode.LeaderPort,},)
 	if err != nil {
 		log.Println(err)
 		return "error"
@@ -373,9 +421,10 @@ func sendHeartbeat(from, target, messageText string) string{
 // The leader sends heartbeats periodically to the other Consensus nodes
 func sendPeriodicHeartbeats(){
 	for {
+		time.Sleep(1 * time.Second)
 		if(thisNode.State == "LEADER"){
-			for _, peerInfo := range thisNode.Peers {
-				sendHeartbeat(thisNode.Name, peerInfo, "heartbeat")
+			for _, peerInfo := range thisNode.CNodes {
+				sendHeartbeat(thisNode.Name, peerInfo)
 			}
 			time.Sleep(heartbeatPeriod * time.Second)
 		}
@@ -390,10 +439,7 @@ func main() {
 	// Initial node setup
 	setUpNodeInfo()
 	thisNode.HBMonitor = NewHeartbeatMonitor()
-	
-	// DEBUG - set node 3 as the leader
-	//setTheLeader("cNode03","50053")
-	
+		
 	// Every node starts to listen for messages - use goroutine
 	go startServer(thisNode.Name, thisNode.Port)
 

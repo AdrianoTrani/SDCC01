@@ -11,7 +11,7 @@ service ChatService {
 }
 
 service Leadership {
-	rpc Heartbeat(Message) returns (google.protobuf.Empty);
+	rpc Heartbeat(LeaderContacts) returns (google.protobuf.Empty);
 	rpc LeaderInfo(google.protobuf.Empty) returns (LeaderContacts);
 	rpc RequestVote(RaftMessage) returns (Reply);
 	rpc AppendEntries(Message) returns (Reply);

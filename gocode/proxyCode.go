@@ -27,6 +27,7 @@ type NodeInfo struct {
 	LeaderName string
 	LeaderPort string
 	CNodes []string
+	State string
 }
 
 
@@ -35,19 +36,14 @@ var thisNode NodeInfo
 const circuitBreakerTimer = 60	//expressed in seconds
 //------------------------------------------------------------------------------------------------------------------------------
 func whoIsLeader(){
-	customPrintln("Client Proxy wants to know who is the leader")
-
 	for _, CNodeInfo := range thisNode.CNodes {
 		// Create the connection
-		//conn, err := grpc.Dial(thisNode.LeaderName+":"+thisNode.LeaderPort,grpc.WithInsecure(),grpc.WithBlock(),)
-		customPrintln("Asking who is the leader to " + CNodeInfo)
 		conn, err := grpc.Dial(CNodeInfo,grpc.WithInsecure(),)
-
 
 		// In case of errors with Dial
 		if err != nil {
-			customPrintln("DIAL ERROR - Tring with another node")
-			continue //try the next cnode
+			//customPrintln("DIAL ERROR - Tring with another node")
+			continue //try to ask to the next cnode
 		}
 
 		// Pospone the closing
@@ -61,13 +57,19 @@ func whoIsLeader(){
 
 		// In case of errors with RPC
 		if err != nil {
-			customPrintln("RPC ERROR")
-			continue //try the next cnode
+			//customPrintln("RPC ERROR")
+			continue //try to ask to the next cnode
 		}else{
 			thisNode.LeaderName = leaderInfo.Leadername
 			thisNode.LeaderPort = leaderInfo.Leaderport
-			customPrintln("Received: " + thisNode.LeaderName + ":" + thisNode.LeaderPort)
+
 			break //stop asking
+			// in case Proxy obtains an answer but there is no leader
+			// 	leaderInfo will be empty
+			// 	every rpc called with the empty address as target will fail
+			// 	circuit breaker will be activated
+			// 	in the meantime the consensus nodes will elect a new leader
+			//	when there will be a new leader, client proxy will be able to contact it
 		}
 	}
 }
@@ -90,7 +92,6 @@ func setInfo(){
 }
 //------------------------------------------------------------------------------------------------------------------------------
 func circuitBreaker(){
-	customPrintln("Time to activate Circuit Breaker")
 	thisNode.CircuitBreaker = true
 	time.Sleep(circuitBreakerTimer * time.Second)
 	thisNode.CircuitBreaker = false
@@ -98,8 +99,6 @@ func circuitBreaker(){
 //------------------------------------------------------------------------------------------------------------------------------
 //Given a key, return the value (if present)
 func readFromExt(key string) (string , error) {
-	customPrintln("Received a reading request from the outside")
-
 	// If Circuit Breaker is active, do not forward the message
 	if(thisNode.CircuitBreaker){
 		return "", errors.New("[CIRCUIT BREAKER]")
@@ -121,7 +120,6 @@ func readFromExt(key string) (string , error) {
 
 		// Create the client for the service "ReadingWriting"
 		client := pb.NewReadingWritingClient(conn)
-		customPrintln("ReadingWritingClient created")
 
 		// Send the message and obtain the Reply
 		reply, err := client.SearchKey(context.Background(),&pb.Message{From: thisNode.Name+":"+thisNode.Port,Text: key,},)
@@ -137,8 +135,6 @@ func readFromExt(key string) (string , error) {
 
 //Given a pair (key,value), insert it in the datastore (if not present)
 func writeFromExt(key, value string) (string , error){
-	customPrintln("Received a writing request from the outside")
-
 	// If Circuit Breaker is active, do not forward the message
 	if(thisNode.CircuitBreaker){
 		return "", errors.New("[CIRCUIT BREAKER]")
@@ -160,7 +156,6 @@ func writeFromExt(key, value string) (string , error){
 
 		// Create the client for the service "ReadingWriting"
 		client := pb.NewReadingWritingClient(conn)
-		customPrintln("ReadingWritingClient created")
 
 		// Send the message and obtain the Reply
 		reply, err := client.AddPair(context.Background(),&pb.PairKeyValue{Key: key,Value: value,},)
@@ -200,9 +195,7 @@ func handleConnection(conn net.Conn) {
         		log.Println("connection:", err)
 			fmt.Printf("Scanner failed\n")
     		}
-		
-		//fmt.Fprintf(conn , "Received: %s\n", receivedCommand)
-
+	
 		// Clean the received input and act accordingly
 		// 	TrimSpace removes unnecessary spaces
 		// 	ToLower makes the console non-case sensitive
@@ -242,8 +235,6 @@ func handleConnection(conn net.Conn) {
 		}
 		fmt.Fprintf(conn , "COMMAND> ")
 	}
-
-
 }
 
 func startConsoleServer(address string){
@@ -271,21 +262,130 @@ func startConsoleServer(address string){
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
-func main() {
-	//Print a short welcoming message at the start
-	greetings()
+func myTerminal() {
+	// Variables
+	myScanner := bufio.NewScanner(os.Stdin)
+	var command_result string
+	var command_error error
 
+	// Pospone closing
+	//defer conn.Close()
+
+	// Brief introduction
+	fmt.Println("Client Proxy Console - Instructions")
+	fmt.Println("SEARCH:<key>")
+	fmt.Println("INSERT:<key>,<value>")
+	fmt.Println("DELETE:<key>")
+	fmt.Println("<COMMAND>")
+
+	// Input cycle - one command at a time
+	for myScanner.Scan(){
+		// Check for errors
+		if err := myScanner.Err(); err != nil {
+			fmt.Println("Scanner failed")
+    		}
+		
+		// Make sure the input structure is correct
+		receivedCommand := strings.TrimSpace(myScanner.Text())
+		if strings.Contains(receivedCommand, ":"){
+			// Clean the received input and act accordingly
+			//	Contains checks the s
+			// 	TrimSpace removes unnecessary spaces
+			// 	ToUpper makes the console non-case sensitive by rewriting the command in uppercase
+			//	SplitN separates command and parameters (if any)
+			commandParts := strings.SplitN(receivedCommand, ":", 2)
+			commandOnly := commandParts[0]
+			parameters := commandParts[1]
+
+			switch strings.ToUpper(commandOnly){
+				case "SEARCH":
+					// Check the provided key
+					if(parameters == ""){
+						fmt.Println("Empty key is not a valid key")
+					}else{
+						// Execute reading operation
+						command_result, command_error = readFromExt(parameters)
+		
+						// If the reading operation didn't go well
+						if(command_error != nil){
+							// Print error message and activate CircuitBreaker if not already present
+							fmt.Println("Something went wrong: " + command_error.Error())
+							if !thisNode.CircuitBreaker{go circuitBreaker()}
+
+						// The reading operation went smoothly
+						}else{
+							// The requested key doesn't exist
+							if(command_result == ""){
+								fmt.Println("The key " + parameters + " is not present")
+
+							// Print the pair key-value
+							}else{
+								fmt.Println("(Key,Value) = (" + parameters + "," + command_result + ")")
+							}
+						}
+					}
+				case "INSERT":
+					// Make sure the input structure is correct
+					if strings.Contains(parameters, ","){
+						// Obtain key and value from input
+						parametersList := strings.SplitN(parameters, ",", 2)
+
+						// Check the provided key
+						if(parametersList[0] == ""){
+							fmt.Println("Empty key is not a valid key")
+						}else{
+
+							// Execute Writing operation
+							command_result, command_error = writeFromExt(string(parametersList[0]),string(parametersList[1]))
+
+							// If the writing operation didn't go well
+							if(command_error != nil){
+								// Print error message and activate CircuitBreaker if not already present
+								fmt.Println("Something went wrong: " + command_error.Error())
+								if !thisNode.CircuitBreaker{go circuitBreaker()}
+
+							// The writing operation went smoothly
+							}else{
+								fmt.Println(command_result)
+							}
+						}
+
+					// Invalid input structure
+					}else{
+						fmt.Println("> The provided command is incorrectly written. Please check the correct syntax")
+					}
+
+
+				default:
+					fmt.Println("> " + commandOnly + " is NOT a valid command")
+			}
+
+		// Input doesn't have the correct structure
+		}else{
+			fmt.Println("> The provided command is incorrectly written. Please check the correct syntax")
+		}
+
+
+
+		fmt.Println("<COMMAND>")
+	}
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------
+func main() {
 	// Set personal information
 	setInfo()
-
-	// Wait
-	shortSleep()
 
 	// Start the listener using a goroutine
 	go startServer(thisNode.Name, thisNode.Port)
 
+	// Wait
+	shortSleep()
+
 	// Start the terminal listener using a goroutine
-	go startConsoleServer(":9001")
+	go myTerminal()
 	
 	// Force the container to stay active - unlike an empty for this is more resource-friendly
 	select {}

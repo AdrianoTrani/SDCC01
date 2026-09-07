@@ -25,7 +25,6 @@ func shortSleep(){
 }
 
 
-
 // Print debug and resume information in a structured way
 func customPrintln(info string){
 	// Obtain information about the function
@@ -160,9 +159,7 @@ func appendOperation(opType, localTime, opInfo string){
 	if err != nil {
 		panic(err)
 	}
-	
 }
-
 
 // Read all Operation Log
 func readAllOp() string{

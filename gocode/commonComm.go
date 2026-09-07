@@ -44,10 +44,7 @@ func startServer(myname, myport string) {
 	// Register the services
 	pb.RegisterChatServiceServer(g, &server{name: myname})
 	pb.RegisterLeadershipServer(g, &serverL{name: myname})
-	//pb.RegisterLeadershipServer(g, &serverL{name: myname,heartbeatMonitor: NewHeartbeatMonitor(),})
 	pb.RegisterReadingWritingServer(g, &serverRW{name: myname})
-
-	customPrintln(myname + " listening on " + myport)
 
 	if err := g.Serve(lis); err != nil {log.Fatal(err)}
 }
@@ -100,25 +97,99 @@ func sendMessage(from, target, messageText string) string{
 //------------------------------------------------------------------------------------------------------------------------------
 // Implement the homonym service inside sdcc.proto
 func (srw *serverRW) SearchKey(ctx context.Context, msg *pb.Message) (*pb.Reply, error) {
-	// Print the received message
-	customPrintln("Received from "+ msg.From + " the Message: " + msg.Text)
+	// Leader receives it from the Client Proxy
+	if(thisNode.State == "LEADER"){
+		// Print the received message
+		customPrintln("Leader received from "+ msg.From + " the Message: " + msg.Text)
 
-	// Register operation in personal log
-	appendOperation("READKEY" , time.Now().Format("15:04:05.000") , "Key: " + msg.Text)
+		// Register operation in personal log
+		appendOperation("READKEY" , time.Now().Format("15:04:05.000") , "Key: " + msg.Text)
 
+		// Send the operation to the followers
+		for _, peerInfo := range thisNode.CNodes {
+			customPrintln("Telling to: " + peerInfo)
+			conn, err := grpc.Dial(peerInfo,grpc.WithInsecure(),)
+
+			// In case of errors with Dial, try with another node
+			if err != nil {
+				continue
+			}
+
+			// Pospone the closing
+			defer conn.Close()
+
+			// Create the client for the service "ReadingWriting"
+			client := pb.NewReadingWritingClient(conn)
+
+			// Send the message and obtain the Reply
+			reply, err := client.SearchKey(context.Background(),&pb.Message{From: thisNode.Name+":"+thisNode.Port,Text: msg.Text,},)
+			if err != nil {
+				continue
+			}
+			customPrintln("Leader received from "+ peerInfo + " the Message: " + reply.Status)
+		}
+	// Follower receives it from the Leader Node
+	}else{
+		customPrintln("Follower received from "+ msg.From + " the Message: " + msg.Text)
+
+		// Register operation in personal log
+		appendOperation("READKEY" , time.Now().Format("15:04:05.000") , "Key: " + msg.Text)
+	}
+	
 	// Build the reply to the message
+	//	Leader reads its own volume and answers to the Client Proxy
+	//	Follower reads its own volume and answers to the Leader Client
 	return &pb.Reply{Status: getValue(msg.Text),}, nil
 }
 
 // Implement the homonym service inside sdcc.proto
 func (srw *serverRW) AddPair(ctx context.Context, pair *pb.PairKeyValue) (*pb.Reply, error) {
-	// Print the received pair
-	customPrintln("Received: (" + pair.Key + "," + pair.Value + ")")
+	// Leader receives it from the Client Proxy
+	if(thisNode.State == "LEADER"){
+		// Print the received pair
+		customPrintln("Leader received: (" + pair.Key + "," + pair.Value + ")")
 	
-	// Register operation in personal log
-	appendOperation("ADDPAIR" , time.Now().Format("15:04:05.000") , "(" + pair.Key + "," + pair.Value + ")")
+		// Register operation in personal log
+		appendOperation("ADDPAIR" , time.Now().Format("15:04:05.000") , "(" + pair.Key + "," + pair.Value + ")")
+
+		// Send the operation to the followers
+		for _, peerInfo := range thisNode.CNodes {
+			customPrintln("Telling to: " + peerInfo)
+			conn, err := grpc.Dial(peerInfo,grpc.WithInsecure(),)
+
+			// In case of errors with Dial, try with another node
+			if err != nil {
+				continue
+			}
+
+			// Pospone the closing
+			defer conn.Close()
+
+			// Create the client for the service "ReadingWriting"
+			client := pb.NewReadingWritingClient(conn)
+
+			// Send the message and obtain the Reply
+			reply, err := client.AddPair(context.Background(),&pb.PairKeyValue{Key: pair.Key,Value: pair.Value,},)
+			if err != nil {
+				continue
+			}
+			customPrintln("Leader received from "+ peerInfo + " the Message: " + reply.Status)
+		}
+
+
+
+	// Follower receives it from the Leader Node
+	}else{
+		customPrintln("Follower received from leader: (" + pair.Key + "," + pair.Value + ")")
+
+		// Register operation in personal log
+		appendOperation("ADDPAIR" , time.Now().Format("15:04:05.000") , "(" + pair.Key + "," + pair.Value + ")")
+
+	}
 
 	// Build the reply to the message
+	//	Leader writes on its own volume and answers to the Client Proxy
+	//	Follower writes on its own volume and answers to the Leader Client
 	return &pb.Reply{Status: writeNewPair(pair.Key, pair.Value),}, nil
 }
 
@@ -130,6 +201,7 @@ func (srw *serverRW) GetAllLog(ctx context.Context, ee *emptypb.Empty) (*pb.Repl
 //------------------------------------------------------------------------------------------------------------------------------
 func (sl *serverL) LeaderInfo(ctx context.Context, ee *emptypb.Empty) (*pb.LeaderContacts, error){
 	// This part build the reply to the message
+	customPrintln("This is the Leader address that I know: " + thisNode.LeaderName + ","+ thisNode.LeaderPort)
 	return &pb.LeaderContacts{Leadername: thisNode.LeaderName,Leaderport: thisNode.LeaderPort,}, nil
 }
 
