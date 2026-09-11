@@ -108,7 +108,7 @@ func recoverElectionTime(){
 
 
 func computeStatElecTime(){
-	customPrintln("--------- MEAN ELECTION TIME ---------")
+	customPrintln("EMPIRICAL DATA")
 	
 	var sum time.Duration = 0
 	var min time.Duration = 1 * time.Hour
@@ -141,7 +141,7 @@ func computeStatElecTime(){
 func recoverOperationLog(){
 	var everyRow string
 
-	customPrintln("--------- RESUME OF EVERY OPERATION INSIDE EVERY VOLUME ---------")
+	customPrintln("RESUME OF EVERY OPERATION")
 	for _, CNodeInfo := range thisNode.CNodes {
 		// Create the connection
 		conn, err := grpc.Dial(CNodeInfo,grpc.WithInsecure(),)
