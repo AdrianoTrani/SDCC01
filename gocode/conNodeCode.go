@@ -199,15 +199,6 @@ func NewHeartbeatMonitor() *HeartbeatMonitor {
 
 		// Quick redundant check
 		if(thisNode.State != "LEADER"){
-
-
-
-			// TEST TEST This is a new round of election
-			//thisNode.AlreadyVoted = false
-
-
-
-
 			// Register operation in personal log
 			appendOperation("ELECTION-START" , time.Now().Format("15:04:05.000") , "Started by: " + thisNode.Name)
 			
@@ -239,7 +230,6 @@ func sendLeaderContacts(leaderName, leaderPort, target string){
 
 	if err != nil {
 		log.Println(err)
-		//return "error"
 	}
 
 	defer conn.Close()
@@ -248,17 +238,6 @@ func sendLeaderContacts(leaderName, leaderPort, target string){
 
 	
 	client.ShareElectionResult(context.Background(),&pb.LeaderContacts{From: thisNode.Name,Leadername: leaderName,Leaderport: leaderPort,},)
-	
-
-	/*
-	reply, err := client.ShareElectionResult(context.Background(),&pb.LeaderContacts{From: from,Leadername: leaderName,Leaderport: leaderPort,},)
-	if err != nil {
-		log.Println(err)
-		return "error"
-	}
-	return ""
-	*/
-
 }
 
 // Send a RequestVote rpc to every other peer

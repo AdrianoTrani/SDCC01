@@ -10,7 +10,7 @@ services:
     environment:
       NAME: "proxy"
       PORT: "50050"
-      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054"
+      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
     build:
       context: .
     command: ["go", "run", "proxyCode.go", "utility.go","commonComm.go"]
@@ -23,7 +23,7 @@ services:
     environment:
       NAME: "cNode01"
       PORT: "50051"
-      ALLPEERS: "cNode02:50052,cNode03:50053,cNode04:50054"
+      ALLPEERS: "cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
     build:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
@@ -36,7 +36,7 @@ services:
     environment:
       NAME: "cNode02"
       PORT: "50052"
-      ALLPEERS: "cNode01:50051,cNode03:50053,cNode04:50054"
+      ALLPEERS: "cNode01:50051,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
     build:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
@@ -49,7 +49,7 @@ services:
     environment:
       NAME: "cNode03"
       PORT: "50053"
-      ALLPEERS: "cNode01:50051,cNode02:50052,cNode04:50054"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
     build:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
@@ -62,7 +62,150 @@ services:
     environment:
       NAME: "cNode04"
       PORT: "50054"
-      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode05:
+    container_name: consensusNode05
+    hostname: cNode05
+    volumes:
+      - volCons05:/mem
+    environment:
+      NAME: "cNode05"
+      PORT: "50055"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode06:
+    container_name: consensusNode06
+    hostname: cNode06
+    volumes:
+      - volCons06:/mem
+    environment:
+      NAME: "cNode06"
+      PORT: "50056"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode07:
+    container_name: consensusNode07
+    hostname: cNode07
+    volumes:
+      - volCons07:/mem
+    environment:
+      NAME: "cNode07"
+      PORT: "50057"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode08:
+    container_name: consensusNode08
+    hostname: cNode08
+    volumes:
+      - volCons08:/mem
+    environment:
+      NAME: "cNode08"
+      PORT: "50058"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode09:
+    container_name: consensusNode09
+    hostname: cNode09
+    volumes:
+      - volCons09:/mem
+    environment:
+      NAME: "cNode09"
+      PORT: "50059"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode10:
+    container_name: consensusNode10
+    hostname: cNode10
+    volumes:
+      - volCons10:/mem
+    environment:
+      NAME: "cNode10"
+      PORT: "50060"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode11:
+    container_name: consensusNode11
+    hostname: cNode11
+    volumes:
+      - volCons11:/mem
+    environment:
+      NAME: "cNode11"
+      PORT: "50061"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode12:
+    container_name: consensusNode12
+    hostname: cNode12
+    volumes:
+      - volCons12:/mem
+    environment:
+      NAME: "cNode12"
+      PORT: "50062"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode13:50063,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode13:
+    container_name: consensusNode13
+    hostname: cNode13
+    volumes:
+      - volCons13:/mem
+    environment:
+      NAME: "cNode13"
+      PORT: "50063"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode14:50064,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode14:
+    container_name: consensusNode14
+    hostname: cNode14
+    volumes:
+      - volCons14:/mem
+    environment:
+      NAME: "cNode14"
+      PORT: "50064"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode15:50065"
+    build:
+      context: .
+    command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
+
+  consensusnode15:
+    container_name: consensusNode15
+    hostname: cNode15
+    volumes:
+      - volCons15:/mem
+    environment:
+      NAME: "cNode15"
+      PORT: "50065"
+      ALLPEERS: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064"
     build:
       context: .
     command: ["go", "run", "conNodeCode.go", "utility.go","commonComm.go"]
@@ -73,7 +216,7 @@ services:
     environment:
       NAME: "snaps"
       PORT: "50049"
-      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054"
+      ALLCNODES: "cNode01:50051,cNode02:50052,cNode03:50053,cNode04:50054,cNode05:50055,cNode06:50056,cNode07:50057,cNode08:50058,cNode09:50059,cNode10:50060,cNode11:50061,cNode12:50062,cNode13:50063,cNode14:50064,cNode15:50065"
     build:
       context: .
     command: ["go", "run", "snapshotCode.go", "utility.go","commonComm.go"]
@@ -88,3 +231,14 @@ volumes:
   volCons02:
   volCons03:
   volCons04:
+  volCons05:
+  volCons06:
+  volCons07:
+  volCons08:
+  volCons09:
+  volCons10:
+  volCons11:
+  volCons12:
+  volCons13:
+  volCons14:
+  volCons15:

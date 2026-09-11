@@ -173,94 +173,6 @@ func writeFromExt(key, value string) (string , error){
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
-func handleConnection(conn net.Conn) {
-	// Variables
-	myScanner := bufio.NewScanner(conn)
-	var command_result string
-	var command_error error
-
-	// Pospone closing
-	defer conn.Close()
-
-	// Brief introduction
-	fmt.Fprintf(conn , "Client Proxy Console - Instructions\n")
-	fmt.Fprintf(conn , "SEARCH:<key>\n")
-	fmt.Fprintf(conn , "INSERT:<key>,<value>\n")
-	fmt.Fprintf(conn , "COMMAND> ")
-
-	// Input cycle - one command at a time
-	for myScanner.Scan(){
-		// Check for errors
-		if err := myScanner.Err(); err != nil {
-        		log.Println("connection:", err)
-			fmt.Printf("Scanner failed\n")
-    		}
-	
-		// Clean the received input and act accordingly
-		// 	TrimSpace removes unnecessary spaces
-		// 	ToLower makes the console non-case sensitive
-		//	SplitN separates command and parameters (if any)
-		receivedCommand := strings.TrimSpace(myScanner.Text())
-		commandParts := strings.SplitN(receivedCommand, ":", 2)
-		commandOnly := commandParts[0]
-		parameters := commandParts[1]
-
-		switch strings.ToLower(commandOnly){
-			case "SEARCH":
-				customPrintln("Received command: " + commandOnly + ":" + parameters)
-				command_result, command_error = readFromExt(parameters)
-				if(command_error != nil){
-					fmt.Fprintf(conn , "Something went wrong: " + command_error.Error() + "\n")
-					// Activate CircuitBreaker if not already present
-					if !thisNode.CircuitBreaker{go circuitBreaker()}
-				}else{
-					fmt.Fprintf(conn , "(Key,Value) = (" + parameters + "," + command_result + ")\n")
-				}
-			case "INSERT":
-				/*
-				parametersList := strings.SplitN(parameters, ",", 2)
-				customPrintln("Received command: " + commandOnly + "(" + parametersList[0] + ","+ parametersList[1] + ")")
-				command_result, command_error = writeFromExt(parameters[0],parameters[1])
-				if(command_error != nil){
-					fmt.Fprintf(conn , "Something went wrong: " + command_error.Error() + "\n")
-					// Activate CircuitBreaker if not already present
-					if !thisNode.CircuitBreaker{go circuitBreaker()}
-				}else{
-					fmt.Fprintf(conn , command_result)
-				}
-				*/
-			default:
-				customPrintln("Received command: " + commandOnly)
-				fmt.Println("> This is NOT a valid command")
-		}
-		fmt.Fprintf(conn , "COMMAND> ")
-	}
-}
-
-func startConsoleServer(address string){
-	// Start to listen
-	listenerConsole, err := net.Listen("tcp", address)
-	if err != nil{
-		log.Printf("Listen failed\n")
-	}
-
-	// Pospone
-	defer listenerConsole.Close()
-
-	// Debug print
-	log.Printf("TCP input listening on %s", address)
-
-	for {
-		conn, err := listenerConsole.Accept()
-		if err != nil {
-			log.Printf("Accept failed\n")
-			continue
-        }
-
-        go handleConnection(conn)
-    }
-}
-
 //------------------------------------------------------------------------------------------------------------------------------
 func myTerminal() {
 	// Variables
@@ -268,14 +180,10 @@ func myTerminal() {
 	var command_result string
 	var command_error error
 
-	// Pospone closing
-	//defer conn.Close()
-
 	// Brief introduction
 	fmt.Println("Client Proxy Console - Instructions")
 	fmt.Println("SEARCH:<key>")
 	fmt.Println("INSERT:<key>,<value>")
-	fmt.Println("DELETE:<key>")
 	fmt.Println("<COMMAND>")
 
 	// Input cycle - one command at a time
