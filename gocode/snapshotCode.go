@@ -61,7 +61,7 @@ func recoverElectionTime(){
 
 		// In case of errors with Dial
 		if err != nil {
-			customPrintln("DIAL ERROR - Tring with the next node")
+			customPrintln("DIAL ERROR - ",CNodeInfo," is not available")
 			continue //try the next cnode
 		}
 
@@ -75,7 +75,7 @@ func recoverElectionTime(){
 		repliedRows, err := client.GetAllLog(context.Background(),&emptypb.Empty{},)
 		// In case of errors with RPC
 		if err != nil {
-			customPrintln("RPC ERROR - Tring with the next node")
+			customPrintln("RPC ERROR - ",CNodeInfo," is not available")
 			continue //try the next cnode
 		// All went fine with RPC
 		}else{
@@ -109,6 +109,8 @@ func recoverElectionTime(){
 
 func computeStatElecTime(){
 	customPrintln("EMPIRICAL DATA")
+
+	recoverElectionTime()
 	
 	var sum time.Duration = 0
 	var min time.Duration = 1 * time.Hour
@@ -118,7 +120,12 @@ func computeStatElecTime(){
 		if(len(everyElTime[i]) == 0){
 			fmt.Println("[",i+1," nodes] Not enough data for this number of nodes")
 		}else{
+			// Reset stat
 			sum = 0
+			min = 1 * time.Hour
+			max = 0
+
+			// Compute statistics
 			for _, elem := range everyElTime[i]{
 					sum += elem
 					if(elem > max){
@@ -148,7 +155,7 @@ func recoverOperationLog(){
 
 		// In case of errors with Dial
 		if err != nil {
-			customPrintln("DIAL ERROR - Tring with another node")
+			customPrintln("DIAL ERROR - ",CNodeInfo," is not available")
 			continue //try the next cnode
 		}
 
@@ -162,7 +169,7 @@ func recoverOperationLog(){
 		repliedRows, err := client.GetAllLog(context.Background(),&emptypb.Empty{},)
 		// In case of errors with RPC
 		if err != nil {
-			customPrintln("RPC ERROR")
+			customPrintln("RPC ERROR - ",CNodeInfo," is not available")
 			continue //try the next cnode
 		// All went fine with RPC
 		}else{
@@ -197,7 +204,6 @@ func main() {
 	//Interrogate periodically the consensus nodes
 	for{
 		time.Sleep(snapPeriod * time.Second)
-		recoverElectionTime()
 		computeStatElecTime()
 		recoverOperationLog()
 	}
