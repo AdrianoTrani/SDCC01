@@ -10,8 +10,6 @@ import (
 	"strings"
 	"bufio"
 	"fmt"
-	"log"
-	"net"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
