@@ -61,7 +61,7 @@ func recoverElectionTime(){
 
 		// In case of errors with Dial
 		if err != nil {
-			customPrintln("DIAL ERROR - ",CNodeInfo," is not available")
+			customPrintln("DIAL ERROR - " + CNodeInfo + " is not available")
 			continue //try the next cnode
 		}
 
@@ -75,7 +75,7 @@ func recoverElectionTime(){
 		repliedRows, err := client.GetAllLog(context.Background(),&emptypb.Empty{},)
 		// In case of errors with RPC
 		if err != nil {
-			customPrintln("RPC ERROR - ",CNodeInfo," is not available")
+			customPrintln("RPC ERROR - " + CNodeInfo + " is not available")
 			continue //try the next cnode
 		// All went fine with RPC
 		}else{
@@ -155,7 +155,7 @@ func recoverOperationLog(){
 
 		// In case of errors with Dial
 		if err != nil {
-			customPrintln("DIAL ERROR - ",CNodeInfo," is not available")
+			customPrintln("DIAL ERROR - " + CNodeInfo + " is not available")
 			continue //try the next cnode
 		}
 
@@ -169,7 +169,7 @@ func recoverOperationLog(){
 		repliedRows, err := client.GetAllLog(context.Background(),&emptypb.Empty{},)
 		// In case of errors with RPC
 		if err != nil {
-			customPrintln("RPC ERROR - ",CNodeInfo," is not available")
+			customPrintln("RPC ERROR - " + CNodeInfo + " is not available")
 			continue //try the next cnode
 		// All went fine with RPC
 		}else{
