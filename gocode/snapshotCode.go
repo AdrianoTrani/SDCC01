@@ -131,7 +131,7 @@ func computeStatElecTime(){
 			}
 	
 			mean := sum / time.Duration(len(everyElTime[i]))
-			fmt.Println("[",i+1, "nodes] Mean election time = ",mean,"min Value = ",min," max value = ",max," - (",len(everyElTime[i])," samples)")
+			fmt.Println("[",i+1, "nodes] Mean election time = ",mean,"|min Value = ",min," |max value = ",max," - (",len(everyElTime[i])," samples)")
 			
 		}
 	}
