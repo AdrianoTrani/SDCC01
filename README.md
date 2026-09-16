@@ -86,6 +86,14 @@ Such pair is NOT present in this repository.
   
 ---
 
+## 🧱 Architectural Diagram
+
+[![System Architecture](Report/Schemino04chiaro.drawio.png)](Report/Schemino04chiaro.drawio.png)
+
+---
+
+
+
 ## 📁 Repository Structure
 | Folder / File                    | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
