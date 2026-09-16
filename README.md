@@ -67,9 +67,9 @@ Suggested: protobuf v1.36.12
 
 	chmod +x ~/.docker/cli-plugins/docker-buildx
 
-**Ip connection**
-	For security issues, the instance accepts connection only from a white-listed IP address.
-	One of the step of the preliminary configuration is to add the IP to that list.
+**Ip connection:**
+	for a better security, the used EC2 instance accepts connection only from a white-listed IP address.
+	One of the step of the preliminary configuration is to add the IP to the whitelist.
 
 ---
 
