@@ -84,8 +84,8 @@ Such pair is NOT present in this repository.
 	- docker compose attach clientproxyserv
 
  - Correct syntax is
- - SEARCH:<key>
- - INSERT:<key>,<value>
+ - `SEARCH:<key>`
+ - `INSERT:<key>,<value>`
 
   
 ---
