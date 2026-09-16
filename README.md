@@ -74,18 +74,20 @@ Suggested: protobuf v1.36.12
 ---
 
 ### 🖥️ File Download and Project Execution
-- On Windows 11 is also requested to configure PuTTy to connect to the instance using a pair of keys.
-Such pair is NOT present in this repository.
-	- Login as ec2-user
-	- (only first time) git clone https://github.com/AdrianoTrani/SDCC01.git
-	- cd SDCC01
-  	- git pull origin main
-	- docker compose up -d --build
-	- docker compose attach clientproxyserv
 
- - Correct syntax is
- - `SEARCH:<key>`
- - `INSERT:<key>,<value>`
+On Windows 11 is also requested to configure PuTTy to connect to the instance using a pair of keys.
+Such pair is NOT present in this repository.
+
+	- `Login as ec2-user`
+	- (only first time) `git clone https://github.com/AdrianoTrani/SDCC01.git`
+	- `cd SDCC01`
+  	- `git pull origin main`
+	- `docker compose up -d --build`
+	- `docker compose attach clientproxyserv`
+
+ - Accepted commands:
+	- `SEARCH:<key>`
+	- `INSERT:<key>,<value>`
 
   
 ---
