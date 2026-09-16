@@ -83,6 +83,10 @@ Such pair is NOT present in this repository.
 	- docker compose up -d --build
 	- docker compose attach clientproxyserv
 
+ - Correct syntax is
+ - SEARCH:<key>
+ - INSERT:<key>,<value>
+
   
 ---
 
