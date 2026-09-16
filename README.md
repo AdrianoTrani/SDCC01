@@ -85,8 +85,8 @@ Such pair is NOT present in this repository.
 ## 📁 Repository Structure
 | Folder / File                    | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
-| `Report/`                       | Technical report in IEEE proceedings format                                |
 | `Presentation/`                 | Power Point presentation                                     |
+| `Report/`                       | Technical report in IEEE proceedings format                                |
 | `Specifics/`                | Full project specification provided by professor                         |
 | `gocode/`                     | Every Go script used by the system                                             |
 | `docker-compose.yml`           | Complete cluster configuration                   |
@@ -98,7 +98,7 @@ Such pair is NOT present in this repository.
 ---
 
 ## 📑 Documentation
-
+- 📄 **Technical report**: `Report/SDCC_ProjectB5_TraniAdriano_Report.pdf` (IEEE format)
 
 ---
 
