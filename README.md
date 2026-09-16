@@ -93,7 +93,7 @@ Such pair is NOT present in this repository.
 
 ## 🧱 Architectural Diagram
 
-[![System Architecture](Report/Schemino04chiaro.drawio.png)](Report/Schemino04chiaro.drawio.png)
+[![System Architecture](Report/ArchContainers04.png)](Report/ArchContainers04.png)
 
 ---
 
@@ -102,7 +102,7 @@ Such pair is NOT present in this repository.
 ## 📁 Repository Structure
 | Folder / File                    | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
-| `Presentation/`                 | Power Point presentation                                     |
+| `Presentation/`                 | Power Point presentation (after oral discussion)                             |
 | `Report/`                       | Technical report in IEEE proceedings format                                |
 | `Specifics/`                | Full project specification provided by professor                         |
 | `gocode/`                     | Every Go script used by the system                                             |
